@@ -22,7 +22,7 @@ describe("Veil", function() {
     expect($(overlaySelector).length).toEqual(0);
   });
 
-  it("should create popover markup on show()", function() {
+  it("should create overlay markup on show()", function() {
     veil = new Veil();
     veil.show();
 
@@ -36,7 +36,14 @@ describe("Veil", function() {
     expect($(backgroundSelector).length).toEqual(1);
   });
 
-  it("should mark popover as active on show()", function() {
+  it("should create overlay markup when overlay() is accessed before show()", function() {
+    veil = new Veil();
+    veil.overlay();
+
+    expect($(overlaySelector).length).toEqual(1);
+  });
+
+  it("should add the .activating and .active classes to the overlay on show()", function() {
     veil = new Veil();
     veil.show();
 
@@ -52,7 +59,7 @@ describe("Veil", function() {
     expect($(backgroundSelector).hasClass('active')).toBeTruthy();
   });
 
-  it("should mark popover as inactive on hide()", function() {
+  it("should mark overlay as inactive on hide()", function() {
     veil = new Veil();
     veil.show();
 
@@ -72,7 +79,7 @@ describe("Veil", function() {
     expect($(backgroundSelector).hasClass('inactive')).toBeTruthy();
   });
 
-  it("should not remove popover markup on hide()", function() {
+  it("should not remove overlay markup on hide()", function() {
     veil = new Veil();
     veil.show();
 
@@ -81,7 +88,7 @@ describe("Veil", function() {
     expect($(overlaySelector).length).toEqual(1);
   });
 
-  it("should remove the popover and background from DOM when destroyed", function() {
+  it("should remove the overlay and background from DOM when destroyed", function() {
     veil = new Veil();
     veil.show();
     veil.destroy();
@@ -126,7 +133,7 @@ describe("Veil", function() {
   });
 
   describe("options", function() {
-    it("should apply a provided CSS class to the popover", function() {
+    it("should apply a provided CSS class to the overlay", function() {
       veil = new Veil({overlayClass: 'additional-class-test'});
       veil.show();
 

@@ -131,6 +131,10 @@
      * @returns {jQuery}
      */
     overlay = function overlay() {
+      if ( !this.exists() ) {
+        _createMarkup.call(this);
+      }
+      
       return this.$overlay;
     };
 
