@@ -24,7 +24,7 @@
     "Gemfile*",
     "Gruntfile.js",
     "package.json",
-    "attache.sublime-project",
+    "veiljs.sublime-project",
     "LICENSE",
     "README.md",
     "test",
