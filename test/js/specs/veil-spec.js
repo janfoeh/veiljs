@@ -3,7 +3,9 @@
 describe("Veil", function() {
   "use strict";
 
-  var veil;
+  var veil,
+      overlaySelector     = '.veil-overlay',
+      backgroundSelector  = '.veil-background';
 
   beforeEach(function() {
     
@@ -11,27 +13,43 @@ describe("Veil", function() {
 
   afterEach(function() {
     veil.destroy();
+    $(backgroundSelector).remove();
   });
 
   it("should be lazy and not create markup on initialization", function() {
     veil = new Veil();
 
-    expect($('.veil-overlay').length).toEqual(0);
+    expect($(overlaySelector).length).toEqual(0);
   });
 
   it("should create popover markup on show()", function() {
     veil = new Veil();
     veil.show();
 
-    expect($('.veil-overlay').length).toEqual(1);
+    expect($(overlaySelector).length).toEqual(1);
+  });
+
+  it("should create background markup on show()", function() {
+    veil = new Veil();
+    veil.show();
+
+    expect($(backgroundSelector).length).toEqual(1);
   });
 
   it("should mark popover as active on show()", function() {
     veil = new Veil();
     veil.show();
 
-    expect($('.veil-overlay').hasClass('inactive')).toBeFalsy();
-    expect($('.veil-overlay').hasClass('active')).toBeTruthy();
+    expect($(overlaySelector).hasClass('inactive')).toBeFalsy();
+    expect($(overlaySelector).hasClass('active')).toBeTruthy();
+  });
+
+  it("should mark background as active on show()", function() {
+    veil = new Veil();
+    veil.show();
+
+    expect($(backgroundSelector).hasClass('inactive')).toBeFalsy();
+    expect($(backgroundSelector).hasClass('active')).toBeTruthy();
   });
 
   it("should mark popover as inactive on hide()", function() {
@@ -40,8 +58,18 @@ describe("Veil", function() {
 
     veil.hide();
 
-    expect($('.veil-overlay').hasClass('active')).toBeFalsy();
-    expect($('.veil-overlay').hasClass('inactive')).toBeTruthy();
+    expect($(overlaySelector).hasClass('active')).toBeFalsy();
+    expect($(overlaySelector).hasClass('inactive')).toBeTruthy();
+  });
+
+  it("should mark background as inactive on hide()", function() {
+    veil = new Veil();
+    veil.show();
+
+    veil.hide();
+
+    expect($(backgroundSelector).hasClass('active')).toBeFalsy();
+    expect($(backgroundSelector).hasClass('inactive')).toBeTruthy();
   });
 
   it("should not remove popover markup on hide()", function() {
@@ -50,15 +78,16 @@ describe("Veil", function() {
 
     veil.hide();
 
-    expect($('.veil-overlay').length).toEqual(1);
+    expect($(overlaySelector).length).toEqual(1);
   });
 
-  it("should remove the popover from DOM when destroyed", function() {
+  it("should remove the popover and background from DOM when destroyed", function() {
     veil = new Veil();
     veil.show();
     veil.destroy();
 
-    expect($('.veil-overlay').length).toEqual(0);
+    expect($(overlaySelector).length).toEqual(0);
+    expect($(backgroundSelector).length).toEqual(0);
   });
 
   it("should update existing markup when setContent is called", function() {
@@ -69,7 +98,7 @@ describe("Veil", function() {
 
     veil.setContent("bar");
 
-    expect($('.veil-overlay').text()).toEqual("bar");
+    expect($(overlaySelector).text()).toEqual("bar");
   });
 
   describe("callbacks", function() {
@@ -102,6 +131,21 @@ describe("Veil", function() {
       veil.show();
 
       expect(veil.overlay().hasClass('additional-class-test')).toBeTruthy();
+    });
+
+    it("should not create a background if backgroundMarkup is set to null", function() {
+      veil = new Veil({backgroundMarkup: null});
+      veil.show();
+
+      expect($(backgroundSelector).length).toEqual(0);
+    });
+
+    it("should allow the background markup to be customized", function() {
+      veil = new Veil({backgroundMarkup: '<div id="custom-background"></div>'});
+      veil.show();
+
+      expect($('#custom-background').length).toEqual(1);
+      expect($(backgroundSelector).length).toEqual(0);
     });
   });
 });

@@ -17,6 +17,7 @@
    * @class
    * @global
    * @param {Object} [options]
+   * @param {String|Null} [options.backgroundMarkup="<div class='veil-background'></div>"] - the markup for the overlay background. Set to null to disable.
    * @param {String} [options.overlayClass] - additional CSS class(es) to apply to the overlay markup
    * @param {Boolean} [options.debug=false] - provide debug information and error handling in the console
    *
@@ -28,6 +29,7 @@
     var that = this;
 
     this.$overlay;
+    this.$background;
 
     this.options = $.extend({}, this.defaults, options);
 
@@ -67,7 +69,8 @@
         _debug;
 
     defaults = {
-      debug: true
+      debug: true,
+      backgroundMarkup: "<div class='veil-background'></div>"
     };
 
     initialize = function initialize() {
@@ -89,8 +92,10 @@
       // from coalescing the style changes from removing 'inactive' and
       // adding 'active'. Coalescing the changes makes entry animations
       // impossible, since the popover changes display from 'none' to 'block'
+      this.$background.removeClass('inactive');
       this.$overlay.removeClass('inactive');
       this.$overlay.get(0).offsetHeight;
+      this.$background.addClass('active');
       this.$overlay.addClass('active');
 
       _executeCallbacksFor.call(this, 'afterShow', this.$overlay);
@@ -111,8 +116,10 @@
       // from coalescing the style changes from removing 'active' and
       // adding 'inactive'. Coalescing the changes makes exit animations
       // impossible, since the popover changes display from 'block' to 'none'
+      this.$background.removeClass('active');
       this.$overlay.removeClass('active');
       this.$overlay.get(0).offsetHeight;
+      this.$background.addClass('inactive');
       this.$overlay.addClass('inactive');
     };
 
@@ -175,6 +182,10 @@
         return false;
       }
 
+      if (this.$background) {
+        this.$background.remove();
+      }
+
       this.$overlay.remove();
     };
 
@@ -185,6 +196,10 @@
      * @private
      */
     _createMarkup = function _createMarkup() {
+      if (!this.$background && typeof this.$backgroundMarkup !== 'null') {
+        this.$background = $(this.options.backgroundMarkup).appendTo('body');
+      }
+
       this.$overlay = $('<div class="veil-overlay inactive"></div>').addClass(this.options.overlayClass);
 
       this.$overlay.html(this.content);
