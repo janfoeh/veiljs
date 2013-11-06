@@ -19,6 +19,7 @@
    * @param {Object} [options]
    * @param {String|Null} [options.backgroundMarkup="<div class='veil-background'></div>"] - the markup for the overlay background. Set to null to disable.
    * @param {String} [options.overlayClass] - additional CSS class(es) to apply to the overlay markup
+   * @param {Boolean} [options.cssTransitionSupport=true] - add support for CSS transitions - see README
    * @param {Boolean} [options.debug=false] - provide debug information and error handling in the console
    *
    * @param {Object} [callbacks] - callbacks to be triggered at various lifecycle moments
@@ -70,7 +71,8 @@
 
     defaults = {
       debug: true,
-      backgroundMarkup: "<div class='veil-background'></div>"
+      backgroundMarkup: "<div class='veil-background'></div>",
+      cssTransitionSupport: true
     };
 
     initialize = function initialize() {
@@ -88,21 +90,23 @@
         _createMarkup.call(this);
       }
 
-      // trigger a style recalculation in order to prevent the browser
-      // from coalescing the style changes from removing 'inactive' and
-      // adding 'active'. Coalescing the changes makes entry animations
-      // impossible, since the popover changes display from 'none' to 'block'
-      this.$background.removeClass('inactive');
-      this.$overlay.removeClass('inactive');
-      this.$overlay.get(0).offsetHeight;
-      this.$background.addClass('active');
-      this.$overlay.addClass('active');
+      var that = this,
+          $all = this.$background.add(this.$overlay);
+      
+      $all.addClass('activating');
+
+      // use a timeout to make sure adding and removing .activating is not
+      // coalesced into a single step
+      setTimeout(function(){
+        $all.removeClass('activating').addClass('active');
+      }, 1);
+      
 
       _executeCallbacksFor.call(this, 'afterShow', this.$overlay);
     };
 
     /**
-     * Hide the overlay. Create the markup first if it does not exist yet
+     * Hide the overlay
      *
      * @memberOf Veil
      * @public
@@ -112,15 +116,18 @@
         return false;
       }
 
-      // trigger a style recalculation in order to prevent the browser
-      // from coalescing the style changes from removing 'active' and
-      // adding 'inactive'. Coalescing the changes makes exit animations
-      // impossible, since the popover changes display from 'block' to 'none'
-      this.$background.removeClass('active');
-      this.$overlay.removeClass('active');
-      this.$overlay.get(0).offsetHeight;
-      this.$background.addClass('inactive');
-      this.$overlay.addClass('inactive');
+      var that = this,
+          $all = this.$background.add(this.$overlay);
+
+      $all.removeClass('active');
+
+      if (this.options.cssTransitionSupport) {
+        $all.addClass('deactivating');
+
+        this.$overlay.one('transitionEnd webkitTransitionEnd', function() {
+          $all.removeClass('deactivating');
+        });
+      }
     };
 
     /**
@@ -134,7 +141,7 @@
       if ( !this.exists() ) {
         _createMarkup.call(this);
       }
-      
+
       return this.$overlay;
     };
 
@@ -157,7 +164,7 @@
      * @returns {Boolean}
      */
     isActive = function isActive() {
-      return this.exists() && this.$overlay.hasClass('active');
+      return this.exists() && (this.$overlay.hasClass('activating') || this.$overlay.hasClass('active'));
     };
 
     /**
@@ -204,7 +211,7 @@
         this.$background = $(this.options.backgroundMarkup).appendTo('body');
       }
 
-      this.$overlay = $('<div class="veil-overlay inactive"></div>').addClass(this.options.overlayClass);
+      this.$overlay = $('<div class="veil-overlay"></div>').addClass(this.options.overlayClass);
 
       this.$overlay.html(this.content);
 

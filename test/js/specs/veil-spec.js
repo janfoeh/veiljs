@@ -1,4 +1,4 @@
-/*global Veil, describe, xdescribe, it, xit, beforeEach, afterEach, expect, runs, waitsFor, spyOn, spyOnEvent */
+/*global Veil, SpecHelper, describe, xdescribe, it, xit, beforeEach, afterEach, expect, runs, waitsFor, spyOn, spyOnEvent */
 
 describe("Veil", function() {
   "use strict";
@@ -16,100 +16,164 @@ describe("Veil", function() {
     $(backgroundSelector).remove();
   });
 
-  it("should be lazy and not create markup on initialization", function() {
-    veil = new Veil();
+  describe("markup", function() {
+    it("should be lazy and not create markup on initialization", function() {
+      veil = new Veil();
 
-    expect($(overlaySelector).length).toEqual(0);
+      expect($(overlaySelector).length).toEqual(0);
+    });
+
+    it("should create overlay markup on show()", function() {
+      veil = new Veil();
+      veil.show();
+
+      expect($(overlaySelector).length).toEqual(1);
+    });
+
+    it("should create background markup on show()", function() {
+      veil = new Veil();
+      veil.show();
+
+      expect($(backgroundSelector).length).toEqual(1);
+    });
+
+    it("should create overlay markup when overlay() is accessed before show()", function() {
+      veil = new Veil();
+      veil.overlay();
+
+      expect($(overlaySelector).length).toEqual(1);
+    });
+
+    it("should not remove overlay markup on hide()", function() {
+      veil = new Veil();
+      veil.show();
+
+      veil.hide();
+
+      expect($(overlaySelector).length).toEqual(1);
+    });
+
+    it("should remove the overlay and background from DOM on destroy()", function() {
+      veil = new Veil();
+      veil.show();
+      veil.destroy();
+
+      expect($(overlaySelector).length).toEqual(0);
+      expect($(backgroundSelector).length).toEqual(0);
+    });
   });
 
-  it("should create overlay markup on show()", function() {
-    veil = new Veil();
-    veil.show();
+  describe("content", function() {
+    it("should update existing markup when setContent is called", function() {
+      veil = new Veil();
+      veil.setContent("foo");
+      veil.show();
+      veil.hide();
 
-    expect($(overlaySelector).length).toEqual(1);
+      veil.setContent("bar");
+
+      expect($(overlaySelector).text()).toEqual("bar");
+    });
   });
 
-  it("should create background markup on show()", function() {
-    veil = new Veil();
-    veil.show();
+  // Testing whether the visibility classes .activating, .active and .deactivating are applied
+  // correctly is a little bit more involved. Both .activating and .deactivating are only applied
+  // temporarily, so we attach a DOM mutation observer to see whether that happened.
 
-    expect($(backgroundSelector).length).toEqual(1);
-  });
+  describe("visibility css classes lifecycle", function() {
+    it("should add .activating and .active to the overlay on show()", function() {
+      var hasActivatingClass  = false,
+          hasActiveClass      = false,
+          classChangeCounter  = 0,
+          overlay,
+          observer;
 
-  it("should create overlay markup when overlay() is accessed before show()", function() {
-    veil = new Veil();
-    veil.overlay();
+      runs(function() {
+        veil    = new Veil();
+        overlay = veil.overlay();
 
-    expect($(overlaySelector).length).toEqual(1);
-  });
+        observer = SpecHelper.onClassChange(overlay, function(target){
+          classChangeCounter += 1;
 
-  it("should add the .activating and .active classes to the overlay on show()", function() {
-    veil = new Veil();
-    veil.show();
+          if (target.hasClass('activating')) {
+            hasActivatingClass = true;
+          }
 
-    expect($(overlaySelector).hasClass('inactive')).toBeFalsy();
-    expect($(overlaySelector).hasClass('active')).toBeTruthy();
-  });
+          if (target.hasClass('active')) {
+            hasActiveClass = true;
+          }
+        });
 
-  it("should mark background as active on show()", function() {
-    veil = new Veil();
-    veil.show();
+        veil.show();
+      });
 
-    expect($(backgroundSelector).hasClass('inactive')).toBeFalsy();
-    expect($(backgroundSelector).hasClass('active')).toBeTruthy();
-  });
+      waitsFor(function() {
+        return classChangeCounter >= 2;
+      }, "The overlays class should have mutated twice", 100);
 
-  it("should mark overlay as inactive on hide()", function() {
-    veil = new Veil();
-    veil.show();
+      runs(function() {
+        observer.disconnect();
+        expect(hasActivatingClass).toBeTruthy();
+        expect(hasActiveClass).toBeTruthy();
+      });
+    });
 
-    veil.hide();
+    it("should add .deactivating to the overlay on hide(), then remove all visibility classes after the transition is finished", function() {
+      var hasDeactivatingClass      = false,
+          classChangeCounter        = 0,
+          waitForTransitionComplete = false,
+          overlay,
+          observer;
 
-    expect($(overlaySelector).hasClass('active')).toBeFalsy();
-    expect($(overlaySelector).hasClass('inactive')).toBeTruthy();
-  });
+      runs(function() {
+        veil    = new Veil({overlayClass: 'transition-test'});
+        overlay = veil.overlay();
+        veil.show();
+      });
 
-  it("should mark background as inactive on hide()", function() {
-    veil = new Veil();
-    veil.show();
+      waitsFor(function() {
+        return veil.overlay().hasClass('active');
+      }, "Veil should have become active", 100);
 
-    veil.hide();
+      runs(function() {
+        observer = SpecHelper.onClassChange(overlay, function(target){
+          classChangeCounter += 1;
 
-    expect($(backgroundSelector).hasClass('active')).toBeFalsy();
-    expect($(backgroundSelector).hasClass('inactive')).toBeTruthy();
-  });
+          if (target.hasClass('deactivating')) {
+            hasDeactivatingClass = true;
+          }
+        });
 
-  it("should not remove overlay markup on hide()", function() {
-    veil = new Veil();
-    veil.show();
+        veil.hide();
+      });
 
-    veil.hide();
+      waitsFor(function() {
+        return classChangeCounter >= 1;
+      }, "The overlays class should have mutated", 100);
 
-    expect($(overlaySelector).length).toEqual(1);
-  });
+      runs(function() {
+        observer.disconnect();
 
-  it("should remove the overlay and background from DOM when destroyed", function() {
-    veil = new Veil();
-    veil.show();
-    veil.destroy();
+        expect(hasDeactivatingClass).toBeTruthy();
+        expect($(overlaySelector).hasClass('active')).toBeFalsy();
 
-    expect($(overlaySelector).length).toEqual(0);
-    expect($(backgroundSelector).length).toEqual(0);
-  });
+        setTimeout(function() {
+          waitForTransitionComplete = true;
+        }, 750);
+      });
 
-  it("should update existing markup when setContent is called", function() {
-    veil = new Veil();
-    veil.setContent("foo");
-    veil.show();
-    veil.hide();
+      waitsFor(function() {
+        return waitForTransitionComplete;
+      }, "The wait flag should have been triggered", 1000);
 
-    veil.setContent("bar");
-
-    expect($(overlaySelector).text()).toEqual("bar");
+      runs(function() {
+        expect($(overlaySelector).hasClass('deactivating')).toBeFalsy();
+      });
+    });
   });
 
   describe("callbacks", function() {
-    it("should trigger the afterCreate callback after create, before show()", function() {
+    it("should trigger afterCreate after create, before show()", function() {
       var overlayVisible  = true,
           callbackFired   = false,
           callback        = function(overlay) { overlayVisible = overlay.hasClass('active'); callbackFired = true; };
@@ -121,7 +185,7 @@ describe("Veil", function() {
       expect(overlayVisible).toBeFalsy();
     });
 
-    it("should trigger the afterShow callback after show()", function() {
+    it("should trigger afterShow after show()", function() {
       var callbackFired = false,
           callback      = function() { callbackFired = true; };
 
@@ -133,21 +197,21 @@ describe("Veil", function() {
   });
 
   describe("options", function() {
-    it("should apply a provided CSS class to the overlay", function() {
+    it("overlayClass should apply a provided CSS class to the overlay", function() {
       veil = new Veil({overlayClass: 'additional-class-test'});
       veil.show();
 
       expect(veil.overlay().hasClass('additional-class-test')).toBeTruthy();
     });
 
-    it("should not create a background if backgroundMarkup is set to null", function() {
+    it("backgroundMarkup: null should not create a background element", function() {
       veil = new Veil({backgroundMarkup: null});
       veil.show();
 
       expect($(backgroundSelector).length).toEqual(0);
     });
 
-    it("should allow the background markup to be customized", function() {
+    it("backgroundMarkup should allow the background markup to be customized", function() {
       veil = new Veil({backgroundMarkup: '<div id="custom-background"></div>'});
       veil.show();
 
