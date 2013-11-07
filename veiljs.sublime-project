@@ -2,7 +2,8 @@
 	"folders":
 	[
 		{
-			"path": "/Users/jfoeh/dev/js/veiljs"
+			"path": "/Users/jfoeh/dev/js/veiljs",
+      "folder_exclude_patterns": ["node_modules"]
 		}
 	]
 }
