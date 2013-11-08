@@ -10,7 +10,7 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
     jsdoc : {
         dist : {
-            src: ['veil.js', 'veil-jquery.js'],
+            src: ['veil.js', 'veil-jquery.js', 'veil-knockout.js'],
             options: {
                 destination: 'doc',
                 private: false

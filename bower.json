@@ -1,6 +1,6 @@
 {
   "name": "veiljs",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "homepage": "https://github.com/janfoeh/veiljs",
   "authors": [
     "Jan-Christian Foeh <jan@programmanstalt.de>"
@@ -9,6 +9,7 @@
   "main": [
     "veil.js",
     "veil-jquery.js",
+    "veil-knockout.js",
     "veil.css"
   ],
   "keywords": [
