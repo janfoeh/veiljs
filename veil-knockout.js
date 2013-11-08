@@ -20,13 +20,12 @@
     /** @lends ko.bindingHandlers.veil */
     init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
       var $element        = $(element),
-          user            = ko.unwrap(valueAccessor()),
           veilTemplate    = allBindingsAccessor().veilTemplate,
           veilOptions     = allBindingsAccessor().veilOptions || {},
           contentCallback;
 
       contentCallback = function(overlay) {
-        ko.renderTemplate(veilTemplate, bindingContext, {}, overlay.get(0));
+        ko.renderTemplate(veilTemplate, valueAccessor(), {}, overlay.get(0));
       };
 
       $element.veil(veilOptions);
