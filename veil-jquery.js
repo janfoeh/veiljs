@@ -39,7 +39,7 @@
           instance.dispose();
         }
 
-        instance = new Veil(this, optionsOrFnName);
+        instance = new Veil(optionsOrFnName);
         inputElement.data(dataKey, instance);
       }
     });
