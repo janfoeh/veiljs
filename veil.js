@@ -18,6 +18,7 @@
    * @global
    * @param {Object} [options]
    * @param {String} [options.overlayClass] - additional CSS class(es) to apply to the overlay markup
+   * @param {Boolean} [options.listenToCustomEvents=false] - listen to 'close.veil' on the overlay element
    * @param {Boolean} [options.debug=false] - provide debug information and error handling in the console
    *
    * @param {Object} [callbacks] - callbacks to be triggered at various lifecycle moments
@@ -226,12 +227,22 @@
      * @public
      */
     show = function show() {
+      var that = this;
+
       if ( !this.exists() ) {
         _createMarkup.call(this);
       }
 
       Veil.instanceActivates(this);
       Veil.activateElement(this.$overlay);
+
+      if (this.options.listenToCustomEvents) {
+        this.$overlay.on('hide.veil', function() {
+          that.hide();
+
+          return false;
+        });
+      }
 
       _executeCallbacksFor.call(this, 'afterShow', this.$overlay);
     };
@@ -250,6 +261,10 @@
 
       Veil.instanceDeactivates(this);
       Veil.deactivateElement(this.$overlay);
+
+      if (this.options.listenToCustomEvents) {
+        this.$overlay.off('hide.veil');
+      }
     };
 
     /**

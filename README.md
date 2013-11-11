@@ -102,6 +102,12 @@ Options
     </tr>
 
     <tr>
+      <td>listenToCustomEvents</td>
+      <td><i>false</i></td>
+      <td>enables custom events. See</td>
+    </tr>
+
+    <tr>
       <td>debug</td>
       <td><i>false</i></td>
       <td>provide debug information and error handling in the console</td>
@@ -140,8 +146,8 @@ API
 
 See the [docs](/docs/index.html) for more details.
 
-Callbacks and Events
---------------------
+Callbacks
+---------
 
 You can add callbacks either in an object literal as the second argument to `new Veil(options, callbacks)`, or through
 `addCallback()`. The second form allows multiple callbacks per trigger, which are executed in the order they where added.
@@ -166,6 +172,32 @@ v.addCallback('afterCreate', function(overlay) {});
 </dl>
 
 See the [docs](/docs/index.html) for more details.
+
+Events
+------
+
+Set the _listenToCustomEvents_ option to `true` to have Veil listen for custom events. Event listeners are bound to the 
+overlay and use the "veil" [event namespace](http://api.jquery.com/on/#event-names).
+
+<dl>
+  <dt>hide.veil</dt>
+  <dd>Hides the overlay</dd>
+</dl>
+
+### Example
+
+```JS
+  var veil = new Veil({listenToCustomEvents: true});
+
+  veil.setContent("<button class='close'>Close me</button>");
+
+  $('.close').on('click', function() {
+    $(this).trigger('hide.veil');
+  });
+```
+
+_Of course in this specific example the same effect could be achieved by simply calling `veil.hide()` in the click handler._ 
+_Please bear with me for the sake of simplicity here._
 
 Extensions
 ----------

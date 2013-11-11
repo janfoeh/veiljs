@@ -355,5 +355,17 @@ describe("Veil", function() {
 
       expect(veil.overlay().hasClass('additional-class-test')).toBeTruthy();
     });
+
+    it("listenToCustomEvents: true should make Veil listen to a custom close event", function() {
+      veil = new Veil({listenToCustomEvents: true});
+      veil.show();
+      veil.setContent("<div id='testbutton'></div>");
+
+      spyOn(veil, 'hide');
+
+      $('#testbutton').trigger('hide.veil');
+
+      expect(veil.hide).toHaveBeenCalled();
+    });
   });
 });
