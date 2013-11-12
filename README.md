@@ -1,6 +1,8 @@
 veiljs
 ======
 
+[![Code Climate](https://codeclimate.com/github/janfoeh/veiljs.png)](https://codeclimate.com/github/janfoeh/veiljs)
+
 VeilJS is slated to become the small library for overlays and dialogues that 
 integrates easily into your project.
 
