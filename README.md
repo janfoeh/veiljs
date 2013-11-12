@@ -69,8 +69,10 @@ Include the components in your site:
 Basic usage
 -----------
 
-Options
+Global options
 -------
+
+These affect all Veil instances on a page. Set them through `Veil.globalOptions`.
 
 <table>
   <thead>
@@ -82,17 +84,11 @@ Options
   </thead>
   <tbody>
     <tr>
-      <td>backgroundMarkup</td>
-      <td>"&lt;div class='veil-background'&gt;&lt;/div&gt;"</td>
+      <td>backdropMarkup</td>
+      <td>"&lt;div class='veil-backdrop'&gt;&lt;/div&gt;"</td>
       <td>
-        the markup for the overlay background. Set to null to disable.
+        the markup for the backdrop. Set to <code>null</code> to disable it.
       </td>
-    </tr>
-
-    <tr>
-      <td>overlayClass</td>
-      <td></td>
-      <td>additional CSS class(es) to apply to the overlay markup</td>
     </tr>
 
     <tr>
@@ -100,11 +96,37 @@ Options
       <td><i>true</i></td>
       <td>see - TODO - for more details</td>
     </tr>
+  </tbody>
+</table>
+
+### Example
+
+`Veil.globalOptions.backdropMarkup = null;`
+
+Options
+-------
+
+These affect only individual instances.
+
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>overlayClass</td>
+      <td></td>
+      <td>additional CSS class(es) to apply to the overlay markup</td>
+    </tr>
 
     <tr>
       <td>listenToCustomEvents</td>
       <td><i>false</i></td>
-      <td>enables custom events. See</td>
+      <td>enables custom events. See <a href="#events">Events</a></td>
     </tr>
 
     <tr>
@@ -114,6 +136,14 @@ Options
     </tr>
   </tbody>
 </table>
+
+### Example
+
+`new Veil({overlayClass: 'my-custom-class'});`
+
+You can set defaults for all future instances, too:
+
+`Veil.prototype.defaults.overlayClass = 'my-custom-class';`
 
 API
 ---
@@ -198,6 +228,66 @@ overlay and use the "veil" [event namespace](http://api.jquery.com/on/#event-nam
 
 _Of course in this specific example the same effect could be achieved by simply calling `veil.hide()` in the click handler._ 
 _Please bear with me for the sake of simplicity here._
+
+Animating Veil
+--------------
+
+Veil overlays and backdrops can be animated completely with CSS transitions; to achieve this, it cycles to a set of state classes:
+
+(no state class) -> .activating -> .active -> .deactivating -> (no state class)
+
+Since you will most likely want to hide inactive overlays through `display: none`, and CSS cannot transition the display property, Veil 
+inserts the .activating state for a couple of milliseconds as a workaround.
+
+Veil listens to the _transitionEnd_ event, so that the .deactivating
+
+### Example CSS
+
+```CSS
+// overlays are hidden by default
+.veil-overlay {
+  display: none;
+  z-index: 10;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+  opacity: 0;
+  -webkit-transform: scale(0.7);
+  -moz-transform: scale(0.7);
+  -ms-transform: scale(0.7);
+  -o-transform: scale(0.7);
+  transform: scale(0.7);
+}
+
+// in all other states, they are displayed
+.veil-overlay.activating, .veil-overlay.active, .veil-overlay.deactivating {
+  display: block;
+}
+
+// the changes from .activating to .active
+.veil-overlay.active {
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+  opacity: 1;
+  -webkit-transform: scale(1);
+  -moz-transform: scale(1);
+  -ms-transform: scale(1);
+  -o-transform: scale(1);
+  transform: scale(1);
+}
+
+// when deactivating, transition back to the default opacity and transform values
+.veil-overlay.deactivating {
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+  opacity: 0;
+  -webkit-transform: scale(0.7);
+  -moz-transform: scale(0.7);
+  -ms-transform: scale(0.7);
+  -o-transform: scale(0.7);
+  transform: scale(0.7);
+}
+```
 
 Extensions
 ----------
