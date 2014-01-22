@@ -160,7 +160,7 @@
     if (Veil.globalOptions.cssTransitionSupport) {
       $element.addClass('deactivating');
 
-      $element.one('transitionEnd webkitTransitionEnd', function() {
+      $element.one('transitionend webkitTransitionEnd', function() {
         $element.removeClass('deactivating');
       });
     }

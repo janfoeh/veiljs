@@ -241,7 +241,7 @@ Veil overlays and backdrops can be animated completely with CSS transitions; to 
 Since you will most likely want to hide inactive overlays through `display: none`, and CSS cannot transition the display property, Veil 
 inserts the .activating state for a couple of milliseconds as a workaround.
 
-Veil listens to the _transitionEnd_ event, so that the .deactivating
+Veil listens to the _transitionend_ event, so that the .deactivating
 
 ### Example CSS
 
