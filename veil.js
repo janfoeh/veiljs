@@ -34,6 +34,7 @@
 
     this.callbacks = {
       'afterCreate':  [],
+      'beforeShow':   [],
       'afterShow':    [],
       'afterHide':    []
     };
@@ -233,6 +234,8 @@
       if ( !this.exists() ) {
         _createMarkup.call(this);
       }
+
+      _executeCallbacksFor.call(this, 'beforeShow', this.$overlay);
 
       Veil.instanceActivates(this);
       Veil.activateElement(this.$overlay);
